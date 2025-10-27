@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneDering Framework</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --color-bg-primary: 255 255 255; /* white */
+        --color-bg-secondary: 249 250 251; /* gray-50 */
+        --color-bg-tertiary: 243 244 246; /* gray-100 */
+        --color-border: 229 231 235; /* gray-200 */
+        --color-text-base: 31 41 55; /* gray-800 */
+        --color-text-muted: 107 114 128; /* gray-500 */
+        --color-text-inverted: 255 255 255; /* white */
+        --color-primary: 59 130 246; /* blue-500 */
+        --color-primary-hover: 37 99 235; /* blue-600 */
+      }
+      .dark {
+        --color-bg-primary: 31 41 55; /* gray-800 */
+        --color-bg-secondary: 17 24 39; /* gray-900 */
+        --color-bg-tertiary: 55 65 81; /* gray-700 */
+        --color-border: 75 85 99; /* gray-600 */
+        --color-text-base: 229 231 235; /* gray-200 */
+        --color-text-muted: 156 163 175; /* gray-400 */
+        --color-text-inverted: 0 0 0; /* black */
+        --color-primary: 59 130 246; /* blue-500 */
+        --color-primary-hover: 96 165 250; /* blue-400 */
+      }
+      .urban {
+        --color-bg-primary: 248 248 248; /* #F8F8F8 */
+        --color-bg-secondary: 17 17 17;   /* #111111 */
+        --color-bg-tertiary: 234 234 234; /* #EAEAEA */
+        --color-border: 221 221 221;     /* #DDDDDD */
+        --color-text-base: 17 17 17;      /* #111111 */
+        --color-text-muted: 85 85 85;   /* #555555 */
+        --color-text-inverted: 255 255 255; /* #FFFFFF */
+        --color-primary: 255 69 0;     /* #FF4500 orange-red */
+        --color-primary-hover: 224 62 0;/* Darker orange */
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'theme-bg-primary': 'rgb(var(--color-bg-primary) / <alpha-value>)',
+              'theme-bg-secondary': 'rgb(var(--color-bg-secondary) / <alpha-value>)',
+              'theme-bg-tertiary': 'rgb(var(--color-bg-tertiary) / <alpha-value>)',
+              'theme-border': 'rgb(var(--color-border) / <alpha-value>)',
+              'theme-text-base': 'rgb(var(--color-text-base) / <alpha-value>)',
+              'theme-text-muted': 'rgb(var(--color-text-muted) / <alpha-value>)',
+              'theme-text-inverted': 'rgb(var(--color-text-inverted) / <alpha-value>)',
+              'theme-primary': 'rgb(var(--color-primary) / <alpha-value>)',
+              'theme-primary-hover': 'rgb(var(--color-primary-hover) / <alpha-value>)',
+              primary: {
+                "50": "#eff6ff", "100": "#dbeafe", "200": "#bfdbfe", "300": "#93c5fd", "400": "#60a5fa", "500": "#3b82f6", "600": "#2563eb", "700": "#1d4ed8", "800": "#1e40af", "900": "#1e3a8a"
+              }
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "vite": "https://aistudiocdn.com/vite@^7.1.11",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "process": "https://aistudiocdn.com/process@^0.11.10",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
