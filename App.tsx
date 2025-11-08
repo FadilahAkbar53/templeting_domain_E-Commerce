@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { RegionProvider, CartProvider, WishlistProvider } from './contexts/RegionContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useCart } from './hooks/useRegions';
 import { formatCurrency } from './services/exportService';
 import Layout from './components/Layout';
@@ -8,10 +9,12 @@ import HomePage from './pages/HomePage';
 import ProductsPage from './pages/UsersPage'; // Alias for clarity, points to the repurposed UsersPage
 import ProductDetailPage from './pages/ProductDetailPage';
 import WishlistPage from './pages/WishlistPage';
+import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 import PromotionsWidget from './plugins/SamplePluginWidget'; // Alias for repurposed plugin
 import { Product } from './types';
 
-type Page = 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist';
+type Page = 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin';
 
 const CartPage: React.FC = () => {
   const { cart, removeFromCart, getCartTotal } = useCart();
@@ -25,7 +28,7 @@ const CartPage: React.FC = () => {
         <div>
           <div className="space-y-4">
             {cart.map(item => (
-              <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-theme-bg-tertiary rounded-lg">
+              <div key={item._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-theme-bg-tertiary rounded-lg">
                 <div className="flex items-center space-x-4 mb-4 sm:mb-0">
                   <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md" />
                   <div>
@@ -35,7 +38,7 @@ const CartPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-4">
                     <p className="font-semibold text-theme-text-base">{formatCurrency(item.price * item.quantity)}</p>
-                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-theme-text-muted hover:text-red-500 rounded-full hover:bg-theme-bg-primary">
+                    <button onClick={() => removeFromCart(item._id)} className="p-2 text-theme-text-muted hover:text-red-500 rounded-full hover:bg-theme-bg-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
@@ -57,17 +60,18 @@ const CartPage: React.FC = () => {
   );
 };
 
-
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { user, loading } = useAuth();
   const [activePage, setActivePage] = useState<Page>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const handlePageChange = useCallback((page: Page) => {
+    if (page === 'admin' && user?.role !== 'admin') return; // Guard admin page
     if (page !== 'productDetail') {
       setSelectedProduct(null);
     }
     setActivePage(page);
-  }, []);
+  }, [user]);
 
   const handleProductSelect = useCallback((product: Product) => {
     setSelectedProduct(product);
@@ -84,33 +88,56 @@ const App: React.FC = () => {
         return <CartPage />;
       case 'wishlist':
         return <WishlistPage onProductSelect={handleProductSelect} />;
+      case 'admin':
+        return user?.role === 'admin' ? <AdminPage /> : <HomePage onProductSelect={handleProductSelect} />; // fallback for safety
       case 'productDetail':
         if (selectedProduct) {
           return <ProductDetailPage product={selectedProduct} onBack={() => handlePageChange('products')} />;
         }
-        return null; // Handled by useEffect to redirect
+        return null;
       default:
         return <HomePage onProductSelect={handleProductSelect} />;
     }
-  }, [activePage, selectedProduct, handleProductSelect, handlePageChange]);
+  }, [activePage, selectedProduct, handleProductSelect, handlePageChange, user]);
 
-  // Redirect if product detail page is active but no product is selected
   React.useEffect(() => {
     if (activePage === 'productDetail' && !selectedProduct) {
       handlePageChange('products');
     }
   }, [activePage, selectedProduct, handlePageChange]);
 
+  if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-theme-bg-secondary">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-theme-primary"></div>
+        </div>
+      );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+  
+  return (
+    <>
+      <PromotionsWidget />
+      <Layout setActivePage={handlePageChange} activePage={activePage}>
+        {pageContent}
+      </Layout>
+    </>
+  );
+};
+
+
+const App: React.FC = () => {
   return (
     <ThemeProvider>
       <RegionProvider>
         <WishlistProvider>
           <CartProvider>
-              <PromotionsWidget />
-
-              <Layout setActivePage={handlePageChange} activePage={activePage}>
-                {pageContent}
-              </Layout>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
           </CartProvider>
         </WishlistProvider>
       </RegionProvider>

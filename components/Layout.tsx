@@ -5,8 +5,8 @@ import Sidebar from './Sidebar';
 
 interface LayoutProps {
   children: React.ReactNode;
-  setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist') => void;
-  activePage: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist';
+  setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => void;
+  activePage: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin';
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, setActivePage, activePage }) => {
@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children, setActivePage, activePage }) 
     setMobileMenuOpen(false);
   }
 
-  const handlePageChange = (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist') => {
+  const handlePageChange = (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => {
     setActivePage(page);
     closeMobileMenu();
   }

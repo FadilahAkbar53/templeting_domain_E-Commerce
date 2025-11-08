@@ -5,7 +5,7 @@ import { useWishlist } from "../hooks/useRegions";
 import { formatCurrency } from "../services/exportService";
 
 // LikeButton Component
-const LikeButton: React.FC<{ productId: number; className?: string }> = ({
+const LikeButton: React.FC<{ productId: string; className?: string }> = ({
   productId,
   className,
 }) => {
@@ -78,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       className="group relative bg-theme-bg-primary shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
     >
       <div className="absolute top-2 right-2 z-10 bg-theme-bg-primary/50 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-        <LikeButton productId={product.id} />
+        <LikeButton productId={product._id} />
       </div>
       <div className="h-40 sm:h-48 overflow-hidden">
         <img
@@ -126,7 +126,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {products.map((product) => (
         <ProductCard
-          key={product.id}
+          key={product._id}
           product={product}
           onProductSelect={onProductSelect}
         />

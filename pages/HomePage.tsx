@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { getMockProducts } from "../services/dataService";
+import { getProducts } from "../services/dataService";
 import { Product } from "../types";
 import { ProductCard } from "../components/UsersTable"; // Re-using UsersTable file for Product components
 
@@ -26,34 +26,15 @@ const HeroCarousel: React.FC<{
     };
   }, [items, autoPlayMs]);
 
-  const goPrev = () => setIndex((i) => (i - 1 + items.length) % items.length);
-  const goNext = () => setIndex((i) => (i + 1) % items.length);
-
   if (items.length === 0) return null;
 
   return (
     <div className="relative w-full">
       <div className="rounded-xl shadow-2xl overflow-hidden">
-        {/* <button
-          aria-label="Previous"
-          onClick={goPrev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-theme-bg-primary/70 rounded-full backdrop-blur hover:bg-theme-bg-primary"
-        >
-          ◀
-        </button> */}
-
-        {/* <button
-          aria-label="Next"
-          onClick={goNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-theme-bg-primary/70 rounded-full backdrop-blur hover:bg-theme-bg-primary"
-        >
-          ▶
-        </button> */}
-
         <div className="w-full h-72 sm:h-96 relative">
           {items.map((p, idx) => (
             <img
-              key={p.id}
+              key={p._id}
               src={p.image}
               alt={p.name}
               onClick={() => onSelect(p)}
@@ -87,7 +68,7 @@ const HomePage: React.FC<HomePageProps> = ({ onProductSelect }) => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const allProducts = await getMockProducts();
+      const allProducts = await getProducts();
       // pick 4 random unique products for hero carousel
       const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
       setFeatured(shuffled.slice(0, Math.min(4, shuffled.length)));
@@ -125,7 +106,7 @@ const HomePage: React.FC<HomePageProps> = ({ onProductSelect }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {featured.map((product) => (
             <ProductCard
-              key={product.id}
+              key={product._id}
               product={product}
               onProductSelect={onProductSelect}
             />

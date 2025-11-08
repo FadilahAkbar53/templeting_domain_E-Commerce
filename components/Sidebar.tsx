@@ -1,9 +1,10 @@
 import React from 'react';
 import Region from './Region';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
-  setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist') => void;
-  activePage: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist';
+  setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => void;
+  activePage: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin';
   isSidebarMinimized: boolean;
   isMobileMenuOpen: boolean;
 }
@@ -53,8 +54,17 @@ const WishlistIcon = () => (
     </svg>
 );
 
+const AdminIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+);
+
 
 const Sidebar: React.FC<SidebarProps> = ({ setActivePage, activePage, isSidebarMinimized, isMobileMenuOpen }) => {
+  const { user } = useAuth();
+
   return (
     <aside className={`flex flex-col flex-shrink-0 bg-theme-bg-primary p-4 shadow-lg transition-all duration-300 ease-in-out overflow-y-auto 
       fixed inset-y-0 left-0 z-40 w-64 transform md:relative md:translate-x-0
@@ -84,6 +94,13 @@ const Sidebar: React.FC<SidebarProps> = ({ setActivePage, activePage, isSidebarM
                 Shopping Cart
               </NavLink>
             </li>
+             {user?.role === 'admin' && (
+              <li>
+                <NavLink onClick={() => setActivePage('admin')} isActive={activePage === 'admin'} icon={<AdminIcon/>} isMinimized={isSidebarMinimized}>
+                  Admin Panel
+                </NavLink>
+              </li>
+            )}
           </ul>
         </nav>
         <div className={`border-t border-theme-border pt-6 mt-6 ${isSidebarMinimized ? 'space-y-2' : 'space-y-6'}`}>

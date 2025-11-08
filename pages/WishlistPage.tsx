@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ProductGrid } from '../components/UsersTable';
-import { getMockProducts } from '../services/dataService';
+import { getProducts } from '../services/dataService';
 import { Product } from '../types';
 import { useWishlist } from '../hooks/useRegions';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -22,7 +22,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const product_data = await getMockProducts();
+        const product_data = await getProducts();
         setAllProducts(product_data);
       } catch (error) {
         console.error("Failed to fetch products", error);
@@ -35,7 +35,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
   }, []);
 
   const wishlistedProducts = useMemo(() => {
-    return allProducts.filter(product => wishlist.includes(product.id));
+    return allProducts.filter(product => wishlist.includes(product._id));
   }, [allProducts, wishlist]);
 
   const handleGetRecommendations = async () => {
@@ -50,8 +50,8 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
 
         const wishlistedItems = wishlistedProducts.map(p => `${p.name} by ${p.brand}`).join(', ');
         const availableItems = allProducts
-            .filter(p => !wishlist.includes(p.id))
-            .map(p => `id: ${p.id}, name: ${p.name}, brand: ${p.brand}, description: ${p.description}`)
+            .filter(p => !wishlist.includes(p._id))
+            .map(p => `id: ${p._id}, name: ${p.name}, brand: ${p.brand}, description: ${p.description}`)
             .join('; ');
             
         const prompt = `You are a shoe expert stylist. Based on the items in this user's wishlist, recommend exactly 3 other shoes from the provided list of available products.
@@ -62,7 +62,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
         
         Only recommend products that are NOT already in the user's wishlist. Your recommendations should be diverse and complement the user's existing style.
         
-        Return your answer as a JSON object with a single key "recommendations" which is an array of product IDs (as numbers). For example: {"recommendations": [2, 5, 8]}.`;
+        Return your answer as a JSON object with a single key "recommendations" which is an array of product IDs (as strings). For example: {"recommendations": ["60d21b4667d0d8992e610c85", "60d21b4667d0d8992e610c86"]}.`;
 
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -75,7 +75,7 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
                         recommendations: {
                             type: Type.ARRAY,
                             items: {
-                                type: Type.INTEGER,
+                                type: Type.STRING,
                             },
                         },
                     },
@@ -86,9 +86,9 @@ const WishlistPage: React.FC<WishlistPageProps> = ({ onProductSelect }) => {
         const jsonText = response.text.trim();
         const result = JSON.parse(jsonText);
         
-        const recommendedIds: number[] = result.recommendations;
+        const recommendedIds: string[] = result.recommendations;
         
-        const recommendedProducts = allProducts.filter(p => recommendedIds.includes(p.id));
+        const recommendedProducts = allProducts.filter(p => recommendedIds.includes(p._id));
         setRecommendations(recommendedProducts);
 
     } catch (e) {

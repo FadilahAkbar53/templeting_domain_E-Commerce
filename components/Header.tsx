@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ThemeSwitcher from './ThemeSwitcher';
 import { useCart } from '../hooks/useRegions';
 import { useWishlist } from '../hooks/useRegions';
+import { useAuth } from '../contexts/AuthContext';
 
 const HamburgerIcon = () => (
     <svg xmlns= "http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -21,10 +22,59 @@ const WishlistIcon = () => (
     </svg>
 );
 
+const UserProfile: React.FC = () => {
+    const { user, logout } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    
+    // This component shouldn't render if there's no user
+    if (!user) return null;
+
+    const roleText = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-full text-theme-text-muted hover:bg-theme-bg-tertiary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-theme-primary"
+                aria-label="User menu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-theme-bg-primary rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5">
+                    <div className="px-4 py-2 text-sm text-theme-text-muted border-b border-theme-border">
+                        Signed in as <strong>{user.username}</strong> ({roleText})
+                    </div>
+                    <button
+                        onClick={logout}
+                        className="w-full text-left px-4 py-2 text-sm text-theme-text-base hover:bg-theme-bg-tertiary"
+                    >
+                        Sign out
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 interface HeaderProps {
     toggleSidebar: () => void;
     toggleMobileMenu: () => void;
-    setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist') => void;
+    setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, setActivePage, toggleMobileMenu }) => {
@@ -92,6 +142,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, setActivePage, toggleMob
           )}
         </button>
         <ThemeSwitcher />
+        <UserProfile />
       </div>
     </header>
   );

@@ -50,7 +50,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: number) => void;
+  removeFromCart: (productId: string) => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
 }
@@ -62,18 +62,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const addToCart = useCallback((product: Product, quantity = 1) => {
         setCart(prevCart => {
-            const existingItem = prevCart.find(item => item.id === product.id);
+            const existingItem = prevCart.find(item => item._id === product._id);
             if (existingItem) {
                 return prevCart.map(item =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+                    item._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
                 );
             }
             return [...prevCart, { ...product, quantity }];
         });
     }, []);
 
-    const removeFromCart = useCallback((productId: number) => {
-        setCart(prevCart => prevCart.filter(item => item.id !== productId));
+    const removeFromCart = useCallback((productId: string) => {
+        setCart(prevCart => prevCart.filter(item => item._id !== productId));
     }, []);
 
     const getCartTotal = useCallback(() => {
@@ -96,17 +96,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 // WISHLIST CONTEXT
 interface WishlistContextType {
-    wishlist: number[];
-    addToWishlist: (productId: number) => void;
-    removeFromWishlist: (productId: number) => void;
-    isProductInWishlist: (productId: number) => boolean;
+    wishlist: string[]; // Store product IDs as strings
+    addToWishlist: (productId: string) => void;
+    removeFromWishlist: (productId: string) => void;
+    isProductInWishlist: (productId: string) => boolean;
     getWishlistItemCount: () => number;
 }
 
 export const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [wishlist, setWishlist] = useState<number[]>(() => {
+    const [wishlist, setWishlist] = useState<string[]>(() => {
         try {
             const item = window.localStorage.getItem('wishlist');
             return item ? JSON.parse(item) : [];
@@ -124,15 +124,15 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
     }, [wishlist]);
 
-    const addToWishlist = useCallback((productId: number) => {
+    const addToWishlist = useCallback((productId: string) => {
         setWishlist(prev => [...prev, productId]);
     }, []);
 
-    const removeFromWishlist = useCallback((productId: number) => {
+    const removeFromWishlist = useCallback((productId: string) => {
         setWishlist(prev => prev.filter(id => id !== productId));
     }, []);
     
-    const isProductInWishlist = useCallback((productId: number) => {
+    const isProductInWishlist = useCallback((productId: string) => {
         return wishlist.includes(productId);
     }, [wishlist]);
 

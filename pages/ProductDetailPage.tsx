@@ -23,12 +23,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product, onBack }
     }
   };
 
-  const isLiked = isProductInWishlist(product.id);
+  const isLiked = isProductInWishlist(product._id);
   const toggleWishlist = () => {
       if (isLiked) {
-          removeFromWishlist(product.id);
+          removeFromWishlist(product._id);
       } else {
-          addToWishlist(product.id);
+          addToWishlist(product._id);
       }
   };
 

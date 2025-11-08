@@ -4,7 +4,7 @@ import {
   ProductFilters,
   ProductTopFilters,
 } from "../components/UsersTable";
-import { getMockProducts } from "../services/dataService";
+import { getProducts } from "../services/dataService";
 import { Product } from "../types";
 
 interface ProductsPageProps {
@@ -25,7 +25,7 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ onProductSelect }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const product_data = await getMockProducts();
+        const product_data = await getProducts();
         setProducts(product_data);
       } catch (error) {
         console.error("Failed to fetch products", error);
