@@ -49,14 +49,24 @@ const createBrand = async (req, res) => {
   try {
     const { name, logo, description } = req.body;
 
-    // Check if brand already exists
-    const existingBrand = await Brand.findOne({ name: name.trim() });
+    // Validate brand name
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Brand name is required" });
+    }
+
+    const trimmedName = name.trim();
+
+    // Check if brand already exists (case-insensitive)
+    const existingBrand = await Brand.findOne({ 
+      name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } 
+    });
+    
     if (existingBrand) {
       return res.status(400).json({ message: "Brand already exists" });
     }
 
     const brand = await Brand.create({
-      name: name.trim(),
+      name: trimmedName,
       logo: logo || "",
       description: description || "",
     });
@@ -81,17 +91,27 @@ const updateBrand = async (req, res) => {
     }
 
     // Check if new name conflicts with existing brand
-    if (name && name.trim() !== brand.name) {
-      const existingBrand = await Brand.findOne({ name: name.trim() });
-      if (existingBrand) {
-        return res.status(400).json({ message: "Brand name already exists" });
-      }
+    if (name && name.trim()) {
+      const trimmedName = name.trim();
+      
+      // Only check if the name is actually different (case-insensitive comparison)
+      if (trimmedName.toLowerCase() !== brand.name.toLowerCase()) {
+        const existingBrand = await Brand.findOne({ 
+          name: { $regex: new RegExp(`^${trimmedName}$`, 'i') },
+          _id: { $ne: req.params.id } // Exclude current brand
+        });
+        
+        if (existingBrand) {
+          return res.status(400).json({ message: "Brand name already exists" });
+        }
 
-      // Update all products with old brand name to new brand name
-      await Product.updateMany({ brand: brand.name }, { brand: name.trim() });
+        // Update all products with old brand name to new brand name
+        await Product.updateMany({ brand: brand.name }, { brand: trimmedName });
+      }
+      
+      brand.name = trimmedName;
     }
 
-    brand.name = name ? name.trim() : brand.name;
     brand.logo = logo !== undefined ? logo : brand.logo;
     brand.description =
       description !== undefined ? description : brand.description;

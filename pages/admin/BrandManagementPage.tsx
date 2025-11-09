@@ -18,6 +18,7 @@ const BrandManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -88,6 +89,13 @@ const BrandManagementPage: React.FC = () => {
       return;
     }
 
+    // Prevent double submission
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       const token = user?.token;
       const url = editingBrand
@@ -103,8 +111,9 @@ const BrandManagementPage: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || "Failed to save brand");
       }
 
@@ -118,6 +127,8 @@ const BrandManagementPage: React.FC = () => {
     } catch (err: any) {
       alert(err.message || "Failed to save brand");
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -370,15 +381,21 @@ const BrandManagementPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="flex-1 px-4 py-2 font-medium text-theme-text-base bg-theme-bg-secondary hover:bg-theme-bg-tertiary rounded-lg transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 font-medium text-theme-text-base bg-theme-bg-secondary hover:bg-theme-bg-tertiary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 font-medium text-white bg-theme-primary hover:bg-theme-primary-hover rounded-lg transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 font-medium text-white bg-theme-primary hover:bg-theme-primary-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingBrand ? "Update" : "Create"}
+                  {isSubmitting
+                    ? "Saving..."
+                    : editingBrand
+                    ? "Update"
+                    : "Create"}
                 </button>
               </div>
             </form>
