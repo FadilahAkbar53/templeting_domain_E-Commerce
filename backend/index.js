@@ -1,8 +1,8 @@
 // backend/index.js
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const mongoose = require('mongoose');
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 // Load environment variables
 dotenv.config();
@@ -17,7 +17,7 @@ app.use(express.json()); // Mem-parsing body request JSON
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB Connected...');
+    console.log("MongoDB Connected...");
   } catch (err) {
     console.error(err.message);
     process.exit(1); // Keluar dari proses jika gagal terhubung
@@ -27,16 +27,24 @@ const connectDB = async () => {
 connectDB();
 
 // Route sederhana untuk tes
-app.get('/', (req, res) => {
-  res.send('API is running...');
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
 
-const productRoutes = require('./routes/productRoutes');
-app.use('/api/products', productRoutes);
+const productRoutes = require("./routes/productRoutes");
+app.use("/api/products", productRoutes);
 
-const userRoutes = require('./routes/userRoutes');
-app.use('/api/users', userRoutes);
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
 
+const wishlistRoutes = require("./routes/wishlistRoutes");
+app.use("/api/wishlist", wishlistRoutes);
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
+const brandRoutes = require("./routes/brandRoutes");
+app.use("/api/brands", brandRoutes);
 
 const PORT = process.env.PORT || 5000;
 
