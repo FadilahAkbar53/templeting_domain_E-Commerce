@@ -4,11 +4,12 @@ import {
   AdminSidebar,
   AdminPage,
 } from "../components/AdminLayout";
-import DashboardPage from "./admin/DashboardPage";
-import ProductsManagementPage from "./admin/ProductsManagementPage";
-import BrandManagementPage from "./admin/BrandManagementPage";
-import UserManagementPage from "./admin/UserManagementPage";
-import AnalyticsPage from "./admin/AnalyticsPage";
+import DashboardPage from "./admin/DashboardPage.tsx";
+import ProductsManagementPage from "./admin/ProductsManagementPage.tsx";
+import BrandManagementPage from "./admin/BrandManagementPage.tsx";
+import OrderManagementPage from "./admin/OrderManagementPage.tsx";
+import UserManagementPage from "./admin/UserManagementPage.tsx";
+import AnalyticsPage from "./admin/AnalyticsPage.tsx";
 
 const AdminPanel: React.FC = () => {
   const [activePage, setActivePage] = useState<AdminPage>("dashboard");
@@ -22,6 +23,8 @@ const AdminPanel: React.FC = () => {
         return <ProductsManagementPage />;
       case "brands":
         return <BrandManagementPage />;
+      case "orders":
+        return <OrderManagementPage />;
       case "users":
         return <UserManagementPage />;
       case "analytics":

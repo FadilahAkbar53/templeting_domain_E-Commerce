@@ -49,6 +49,9 @@ const ProductsManagementPage: React.FC = () => {
       try {
         await deleteProduct(productId);
         await fetchProducts();
+        // Trigger refresh for user-facing pages
+        window.dispatchEvent(new Event("refreshProducts"));
+        console.log("🔄 Product deleted, triggering refresh for users");
       } catch (err) {
         setError("Failed to delete product.");
         console.error(err);
@@ -60,11 +63,16 @@ const ProductsManagementPage: React.FC = () => {
     try {
       if ("_id" in productData) {
         await updateProduct(productData);
+        console.log("✏️ Product updated");
       } else {
         await addProduct(productData as Omit<Product, "_id">);
+        console.log("➕ Product added");
       }
       setIsModalOpen(false);
       await fetchProducts();
+      // Trigger refresh for user-facing pages
+      window.dispatchEvent(new Event("refreshProducts"));
+      console.log("🔄 Triggering refresh for user pages");
     } catch (err) {
       setError("Failed to save product.");
       console.error(err);

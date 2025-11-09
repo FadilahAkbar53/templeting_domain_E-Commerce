@@ -25,6 +25,56 @@ export interface User {
 
 export interface CartItem extends Product {
   quantity: number;
+  size?: number;
+}
+
+export interface Order {
+  _id: string;
+  user: string;
+  orderNumber: string;
+  items: OrderItem[];
+  shippingAddress: ShippingAddress;
+  shippingService: ShippingService;
+  paymentMethod: string;
+  itemsPrice: number;
+  shippingPrice: number;
+  totalPrice: number;
+  status: "pending" | "confirmed" | "shipped" | "completed" | "cancelled";
+  statusHistory: StatusHistory[];
+  cancelReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderItem {
+  product: string;
+  name: string;
+  brand: string;
+  image: string;
+  price: number;
+  quantity: number;
+  size: number;
+}
+
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
+export interface ShippingService {
+  name: string;
+  cost: number;
+  estimatedDays: string;
+}
+
+export interface StatusHistory {
+  status: string;
+  note: string;
+  updatedAt: string;
 }
 
 export interface RegionComponent {

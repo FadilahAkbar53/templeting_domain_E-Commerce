@@ -14,10 +14,11 @@ interface ProductsPageProps {
 const ProductsPage: React.FC<ProductsPageProps> = ({ onProductSelect }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({
     brand: "All",
     size: "All",
-    price: 1000,
+    price: 10000000, // Set to very high default to show all products
   });
   const [sort, setSort] = useState("default");
 
@@ -27,6 +28,14 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ onProductSelect }) => {
         setLoading(true);
         const product_data = await getProducts();
         setProducts(product_data);
+        console.log("✅ Products page loaded:", product_data.length);
+
+        // Set initial max price to highest product price
+        if (product_data.length > 0) {
+          const maxPrice = Math.max(...product_data.map((p) => p.price));
+          setFilters((prev) => ({ ...prev, price: maxPrice }));
+          console.log("📊 Max price set to:", maxPrice);
+        }
       } catch (error) {
         console.error("Failed to fetch products", error);
       } finally {
@@ -35,6 +44,16 @@ const ProductsPage: React.FC<ProductsPageProps> = ({ onProductSelect }) => {
     };
 
     fetchProducts();
+  }, [refreshKey]); // Re-fetch when refreshKey changes
+
+  // Listen for product refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      console.log("🔄 Refreshing products page...");
+      setRefreshKey((prev) => prev + 1);
+    };
+    window.addEventListener("refreshProducts", handleRefresh);
+    return () => window.removeEventListener("refreshProducts", handleRefresh);
   }, []);
 
   const filteredAndSortedProducts = useMemo(() => {

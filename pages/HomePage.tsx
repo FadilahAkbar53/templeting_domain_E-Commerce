@@ -65,15 +65,32 @@ const HeroCarousel: React.FC<{
 
 const HomePage: React.FC<HomePageProps> = ({ onProductSelect }) => {
   const [featured, setFeatured] = useState<Product[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    console.log("🏠 HomePage mounted, fetching products...");
     const fetchProducts = async () => {
-      const allProducts = await getProducts();
-      // pick 4 random unique products for hero carousel
-      const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
-      setFeatured(shuffled.slice(0, Math.min(4, shuffled.length)));
+      try {
+        const allProducts = await getProducts();
+        console.log("✅ Products loaded:", allProducts.length);
+        // pick 4 random unique products for hero carousel
+        const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
+        setFeatured(shuffled.slice(0, Math.min(4, shuffled.length)));
+      } catch (err) {
+        console.error("❌ Failed to load products:", err);
+      }
     };
     fetchProducts();
+  }, [refreshKey]); // Re-fetch when refreshKey changes
+
+  // Listen for product refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      console.log("🔄 Refreshing products...");
+      setRefreshKey((prev) => prev + 1);
+    };
+    window.addEventListener("refreshProducts", handleRefresh);
+    return () => window.removeEventListener("refreshProducts", handleRefresh);
   }, []);
 
   return (

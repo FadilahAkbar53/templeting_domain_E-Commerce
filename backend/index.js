@@ -13,6 +13,19 @@ const app = express();
 app.use(cors()); // Mengizinkan permintaan dari domain lain (frontend Anda)
 app.use(express.json()); // Mem-parsing body request JSON
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`\n📥 ${req.method} ${req.url}`);
+  console.log(
+    "Headers:",
+    req.headers.authorization ? "Bearer token present" : "No token"
+  );
+  if (req.method === "POST" || req.method === "PUT") {
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
+
 // Koneksi ke Database
 const connectDB = async () => {
   try {
@@ -45,6 +58,9 @@ app.use("/api/admin", adminRoutes);
 
 const brandRoutes = require("./routes/brandRoutes");
 app.use("/api/brands", brandRoutes);
+
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 

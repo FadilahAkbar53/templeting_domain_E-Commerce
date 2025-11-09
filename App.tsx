@@ -1,10 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import {
-  RegionProvider,
-  CartProvider,
-  WishlistProvider,
-} from "./contexts/RegionContext";
+import { RegionProvider, WishlistProvider } from "./contexts/RegionContext";
+import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useCart } from "./hooks/useRegions";
 import { formatCurrency } from "./services/exportService";
@@ -13,6 +10,8 @@ import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/UsersPage"; // Alias for clarity, points to the repurposed UsersPage
 import ProductDetailPage from "./pages/ProductDetailPage";
 import WishlistPage from "./pages/WishlistPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminPanel from "./pages/AdminPanel";
 import LoginPage from "./pages/LoginPage";
 import PromotionsWidget from "./plugins/SamplePluginWidget"; // Alias for repurposed plugin
@@ -22,12 +21,42 @@ type Page =
   | "home"
   | "products"
   | "cart"
+  | "checkout"
+  | "myOrders"
   | "productDetail"
   | "wishlist"
   | "admin";
 
 const CartPage: React.FC = () => {
-  const { cart, removeFromCart, getCartTotal } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    toggleSelectItem,
+    toggleSelectAll,
+    getSelectedTotal,
+    getSelectedItemCount,
+    allSelected,
+  } = useCart();
+  const { user } = useAuth();
+  const [navigateTo, setNavigateTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (navigateTo) {
+      // This would trigger navigation in parent component
+      window.dispatchEvent(new CustomEvent("navigate", { detail: navigateTo }));
+      setNavigateTo(null);
+    }
+  }, [navigateTo]);
+
+  const handleCheckout = () => {
+    const selectedCount = getSelectedItemCount();
+    if (selectedCount === 0) {
+      alert("Pilih minimal 1 produk untuk checkout");
+      return;
+    }
+    setNavigateTo("checkout");
+  };
 
   return (
     <div className="bg-theme-bg-primary shadow-lg rounded-xl p-6 sm:p-8">
@@ -38,61 +67,118 @@ const CartPage: React.FC = () => {
         <p className="text-theme-text-muted">Your cart is empty.</p>
       ) : (
         <div>
+          {/* Select All */}
+          <div className="mb-4 flex items-center">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleSelectAll}
+              className="w-5 h-5 text-theme-primary rounded focus:ring-2 focus:ring-theme-primary"
+            />
+            <label className="ml-3 text-theme-text-base font-medium">
+              Pilih Semua ({cart.length} item)
+            </label>
+          </div>
+
           <div className="space-y-4">
             {cart.map((item) => (
               <div
-                key={item._id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-theme-bg-tertiary rounded-lg"
+                key={`${item._id}-${item.size}`}
+                className="flex items-start p-4 bg-theme-bg-tertiary rounded-lg"
               >
-                <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded-md"
-                  />
-                  <div>
-                    <h2 className="font-semibold text-theme-text-base">
-                      {item.name}
-                    </h2>
-                    <p className="text-sm text-theme-text-muted">
-                      {formatCurrency(item.price)} x {item.quantity}
-                    </p>
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  checked={item.selected}
+                  onChange={() => toggleSelectItem(item._id, item.size)}
+                  className="mt-1 w-5 h-5 text-theme-primary rounded focus:ring-2 focus:ring-theme-primary"
+                />
+
+                <div className="ml-4 flex flex-col sm:flex-row items-start sm:items-center justify-between flex-1">
+                  <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-16 h-16 object-cover rounded-md"
+                    />
+                    <div>
+                      <h2 className="font-semibold text-theme-text-base">
+                        {item.name}
+                      </h2>
+                      <p className="text-sm text-theme-text-muted">
+                        {item.brand} • Size {item.size}
+                      </p>
+                      <p className="text-sm text-theme-text-muted">
+                        {formatCurrency(item.price)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-4">
-                  <p className="font-semibold text-theme-text-base">
-                    {formatCurrency(item.price * item.quantity)}
-                  </p>
-                  <button
-                    onClick={() => removeFromCart(item._id)}
-                    className="p-2 text-theme-text-muted hover:text-red-500 rounded-full hover:bg-theme-bg-primary"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                  <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-4">
+                    {/* Quantity Controls */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          updateQuantity(item._id, item.quantity - 1, item.size)
+                        }
+                        className="w-8 h-8 bg-theme-bg-primary rounded-md hover:bg-theme-border flex items-center justify-center"
+                      >
+                        -
+                      </button>
+                      <span className="w-12 text-center font-semibold text-theme-text-base">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateQuantity(item._id, item.quantity + 1, item.size)
+                        }
+                        className="w-8 h-8 bg-theme-bg-primary rounded-md hover:bg-theme-border flex items-center justify-center"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <p className="font-semibold text-theme-text-base">
+                      {formatCurrency(item.price * item.quantity)}
+                    </p>
+                    <button
+                      onClick={() => removeFromCart(item._id, item.size)}
+                      className="p-2 text-theme-text-muted hover:text-red-500 rounded-full hover:bg-theme-bg-primary"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-8 pt-6 border-t border-theme-border flex justify-end">
+          <div className="mt-8 pt-6 border-t border-theme-border flex justify-between items-center">
+            <div>
+              <p className="text-sm text-theme-text-muted">
+                {getSelectedItemCount()} item dipilih
+              </p>
+            </div>
             <div className="text-right">
               <p className="text-lg text-theme-text-muted">Total:</p>
               <p className="text-3xl font-bold text-theme-text-base">
-                {formatCurrency(getCartTotal())}
+                {formatCurrency(getSelectedTotal())}
               </p>
-              <button className="mt-4 w-full px-6 py-3 text-lg font-bold text-white bg-theme-primary hover:bg-theme-primary-hover rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-theme-primary">
+              <button
+                onClick={handleCheckout}
+                className="mt-4 w-full px-6 py-3 text-lg font-bold text-white bg-theme-primary hover:bg-theme-primary-hover rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-theme-primary"
+              >
                 Proceed to Checkout
               </button>
             </div>
@@ -112,8 +198,22 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     if (user?.role === "admin") {
       setActivePage("admin");
+    } else if (user?.role === "user") {
+      // Ensure regular users start at home
+      setActivePage("home");
     }
   }, [user]);
+
+  // Listen for navigation events from cart checkout
+  useEffect(() => {
+    const handleNavigate = (e: CustomEvent) => {
+      handlePageChange(e.detail as Page);
+    };
+    window.addEventListener("navigate", handleNavigate as EventListener);
+    return () => {
+      window.removeEventListener("navigate", handleNavigate as EventListener);
+    };
+  }, []);
 
   const handlePageChange = useCallback(
     (page: Page) => {
@@ -124,6 +224,12 @@ const AppContent: React.FC = () => {
       if (page !== "productDetail") {
         setSelectedProduct(null);
       }
+
+      // Trigger product refresh when navigating to home or products page
+      if (page === "home" || page === "products") {
+        window.dispatchEvent(new Event("refreshProducts"));
+      }
+
       setActivePage(page);
     },
     [user]
@@ -135,11 +241,6 @@ const AppContent: React.FC = () => {
   }, []);
 
   const pageContent = useMemo(() => {
-    // Admin users see admin panel only
-    if (user?.role === "admin" && activePage === "admin") {
-      return <AdminPanel />;
-    }
-
     // Regular users see regular pages
     switch (activePage) {
       case "home":
@@ -148,6 +249,10 @@ const AppContent: React.FC = () => {
         return <ProductsPage onProductSelect={handleProductSelect} />;
       case "cart":
         return <CartPage />;
+      case "checkout":
+        return <CheckoutPage />;
+      case "myOrders":
+        return <MyOrdersPage />;
       case "wishlist":
         return <WishlistPage onProductSelect={handleProductSelect} />;
       case "productDetail":
@@ -159,17 +264,14 @@ const AppContent: React.FC = () => {
             />
           );
         }
-        return null;
+        return <HomePage onProductSelect={handleProductSelect} />;
+      case "admin":
+        // Admin panel handled separately
+        return <AdminPanel />;
       default:
         return <HomePage onProductSelect={handleProductSelect} />;
     }
-  }, [
-    activePage,
-    selectedProduct,
-    handleProductSelect,
-    handlePageChange,
-    user,
-  ]);
+  }, [activePage, selectedProduct, handleProductSelect, handlePageChange]);
 
   React.useEffect(() => {
     if (activePage === "productDetail" && !selectedProduct) {
@@ -177,7 +279,18 @@ const AppContent: React.FC = () => {
     }
   }, [activePage, selectedProduct, handlePageChange]);
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log("🔍 App State:", {
+      user: user ? { username: user.username, role: user.role } : null,
+      loading,
+      activePage,
+      selectedProduct: selectedProduct?.name || null,
+    });
+  }, [user, loading, activePage, selectedProduct]);
+
   if (loading) {
+    console.log("⏳ Loading state...");
     return (
       <div className="flex items-center justify-center min-h-screen bg-theme-bg-secondary">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-theme-primary"></div>
@@ -186,14 +299,18 @@ const AppContent: React.FC = () => {
   }
 
   if (!user) {
+    console.log("🔐 No user, showing login page");
     return <LoginPage />;
   }
 
-  // Admin users don't see the regular layout
+  // Admin users see admin panel without regular layout
   if (user.role === "admin") {
-    return pageContent;
+    console.log("👨‍💼 Rendering Admin Panel");
+    return <AdminPanel />;
   }
 
+  // Regular users see the layout with navigation
+  console.log("👤 Rendering User Layout with page:", activePage);
   return (
     <>
       <PromotionsWidget />
