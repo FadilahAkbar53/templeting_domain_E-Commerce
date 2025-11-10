@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  AdminLayout,
-  AdminSidebar,
-  AdminPage,
-} from "../components/AdminLayout";
+import { AdminLayout, AdminPage } from "../components/AdminLayout";
 import DashboardPage from "./admin/DashboardPage.tsx";
 import ProductsManagementPage from "./admin/ProductsManagementPage.tsx";
 import BrandManagementPage from "./admin/BrandManagementPage.tsx";
@@ -13,7 +9,6 @@ import AnalyticsPage from "./admin/AnalyticsPage.tsx";
 
 const AdminPanel: React.FC = () => {
   const [activePage, setActivePage] = useState<AdminPage>("dashboard");
-  const [isMinimized, setIsMinimized] = useState(false);
 
   const renderContent = () => {
     switch (activePage) {
@@ -35,12 +30,7 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
-      <AdminSidebar
-        activePage={activePage}
-        setActivePage={setActivePage}
-        isMinimized={isMinimized}
-      />
+    <AdminLayout activePage={activePage} setActivePage={setActivePage}>
       <main className="flex-1 overflow-y-auto p-6 lg:p-8">
         {renderContent()}
       </main>

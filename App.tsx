@@ -314,7 +314,11 @@ const AppContent: React.FC = () => {
   return (
     <>
       <PromotionsWidget />
-      <Layout setActivePage={handlePageChange} activePage={activePage}>
+      <Layout
+        setActivePage={handlePageChange}
+        activePage={activePage}
+        onProductSelect={handleProductSelect}
+      >
         {pageContent}
       </Layout>
     </>

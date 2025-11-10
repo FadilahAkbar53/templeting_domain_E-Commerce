@@ -3,6 +3,8 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  activePage: AdminPage;
+  setActivePage: (page: AdminPage) => void;
 }
 
 type AdminPage =
@@ -17,12 +19,16 @@ interface AdminSidebarProps {
   activePage: AdminPage;
   setActivePage: (page: AdminPage) => void;
   isMinimized: boolean;
+  isMobileMenuOpen: boolean;
+  onMobileMenuClose: () => void;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
   activePage,
   setActivePage,
   isMinimized,
+  isMobileMenuOpen,
+  onMobileMenuClose,
 }) => {
   const menuItems = [
     {
@@ -147,25 +153,36 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     },
   ];
 
+  const handleMenuClick = (page: AdminPage) => {
+    setActivePage(page);
+    onMobileMenuClose(); // Close mobile menu after selecting a page
+  };
+
   return (
     <aside
-      className={`bg-theme-bg-primary border-r border-theme-border transition-all duration-300 ${
-        isMinimized ? "w-20" : "w-64"
-      }`}
+      className={`bg-theme-bg-primary border-r border-theme-border transition-all duration-300 
+        fixed inset-y-0 left-0 z-40 transform lg:relative lg:translate-x-0
+        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        ${isMinimized ? "lg:w-20" : "lg:w-64"} 
+        w-64
+      `}
     >
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => setActivePage(item.id)}
+            onClick={() => handleMenuClick(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
               activePage === item.id
                 ? "bg-theme-primary text-white"
                 : "text-theme-text-base hover:bg-theme-bg-tertiary"
-            } ${isMinimized ? "justify-center" : ""}`}
+            } ${isMinimized ? "lg:justify-center" : ""}`}
           >
             {item.icon}
             {!isMinimized && <span className="font-medium">{item.label}</span>}
+            {isMinimized && (
+              <span className="lg:sr-only font-medium">{item.label}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -173,9 +190,26 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   );
 };
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({
+  children,
+  activePage,
+  setActivePage,
+}) => {
   const { user, logout } = useAuth();
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
 
   return (
     <div className="flex flex-col h-screen bg-theme-bg-secondary">
@@ -183,9 +217,32 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <header className="bg-theme-bg-primary shadow-md px-6 py-4 border-b border-theme-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
+            {/* Mobile Menu Toggle - visible on small screens */}
             <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-2 rounded-lg hover:bg-theme-bg-tertiary text-theme-text-muted transition-colors"
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-lg hover:bg-theme-bg-tertiary text-theme-text-muted transition-colors lg:hidden"
+              aria-label="Toggle mobile menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+            {/* Desktop Minimize Toggle - visible on large screens */}
+            <button
+              onClick={toggleMinimize}
+              className="p-2 rounded-lg hover:bg-theme-bg-tertiary text-theme-text-muted transition-colors hidden lg:block"
+              aria-label="Toggle sidebar"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +295,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar akan di-inject dari children jika diperlukan */}
+        {/* Mobile Overlay - close sidebar when clicking outside */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={closeMobileMenu}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Sidebar */}
+        <AdminSidebar
+          activePage={activePage}
+          setActivePage={setActivePage}
+          isMinimized={isMinimized}
+          isMobileMenuOpen={isMobileMenuOpen}
+          onMobileMenuClose={closeMobileMenu}
+        />
+
+        {/* Main Content */}
         {children}
       </div>
     </div>
