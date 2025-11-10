@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
+import React, { useState } from "react";
+import Header from "./Header";
+import Footer from "./Footer";
+import Sidebar from "./Sidebar";
+import { Product } from "../types";
 
 interface LayoutProps {
   children: React.ReactNode;
-  setActivePage: (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => void;
-  activePage: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin';
+  setActivePage: (
+    page: "home" | "products" | "cart" | "productDetail" | "wishlist" | "admin"
+  ) => void;
+  activePage:
+    | "home"
+    | "products"
+    | "cart"
+    | "productDetail"
+    | "wishlist"
+    | "admin";
+  onProductSelect: (product: Product) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, setActivePage, activePage }) => {
+const Layout: React.FC<LayoutProps> = ({
+  children,
+  setActivePage,
+  activePage,
+  onProductSelect,
+}) => {
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -20,34 +35,36 @@ const Layout: React.FC<LayoutProps> = ({ children, setActivePage, activePage }) 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
   };
-  
+
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
-  }
+  };
 
-  const handlePageChange = (page: 'home' | 'products' | 'cart' | 'productDetail' | 'wishlist' | 'admin') => {
+  const handlePageChange = (
+    page: "home" | "products" | "cart" | "productDetail" | "wishlist" | "admin"
+  ) => {
     setActivePage(page);
     closeMobileMenu();
-  }
-
+  };
 
   return (
     <div className="flex flex-col h-screen bg-theme-bg-secondary text-theme-text-base overflow-hidden">
-      <Header 
+      <Header
         toggleSidebar={toggleSidebar}
         toggleMobileMenu={toggleMobileMenu}
         setActivePage={setActivePage}
+        onProductSelect={onProductSelect}
       />
       <div className="flex flex-1 overflow-hidden">
         {isMobileMenuOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 z-30 md:hidden"
             onClick={closeMobileMenu}
             aria-hidden="true"
           />
         )}
-        <Sidebar 
-          setActivePage={handlePageChange} 
+        <Sidebar
+          setActivePage={handlePageChange}
           activePage={activePage}
           isSidebarMinimized={isSidebarMinimized}
           isMobileMenuOpen={isMobileMenuOpen}
