@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 
 const LoginPage: React.FC = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);

@@ -45,7 +45,7 @@ const OrderManagementPage: React.FC = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const url = `http://localhost:5000/api/orders/admin/all?status=${filterStatus}`;
+      const url = `/api/orders/admin/all?status=${filterStatus}`;
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
@@ -72,7 +72,7 @@ const OrderManagementPage: React.FC = () => {
     try {
       setUpdating(true);
       const response = await fetch(
-        `http://localhost:5000/api/orders/${updateStatusModal._id}/status`,
+        `/api/orders/${updateStatusModal._id}/status`,
         {
           method: "PUT",
           headers: {

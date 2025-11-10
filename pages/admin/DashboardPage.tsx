@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
       setLoading(true);
       const token = user?.token;
 
-      const response = await fetch("http://localhost:5000/api/admin/stats", {
+      const response = await fetch("/api/admin/stats", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

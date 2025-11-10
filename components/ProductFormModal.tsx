@@ -41,7 +41,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const fetchBrands = async () => {
     setLoadingBrands(true);
     try {
-      const response = await fetch("http://localhost:5000/api/brands");
+      const response = await fetch("/api/brands");
       if (response.ok) {
         const data = await response.json();
         setBrands(data);

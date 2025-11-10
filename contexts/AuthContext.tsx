@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useMemo, useCallback, useEffect } from 'react';
 import { User } from '../types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 
 interface AuthContextType {
   user: User | null;

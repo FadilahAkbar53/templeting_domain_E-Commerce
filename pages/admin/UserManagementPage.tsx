@@ -25,7 +25,7 @@ const UserManagementPage: React.FC = () => {
       setLoading(true);
       const token = currentUser?.token;
 
-      const response = await fetch("http://localhost:5000/api/admin/users", {
+      const response = await fetch("/api/admin/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -61,7 +61,7 @@ const UserManagementPage: React.FC = () => {
       const token = currentUser?.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${userId}/role`,
+        `/api/admin/users/${userId}/role`,
         {
           method: "PUT",
           headers: {
@@ -98,7 +98,7 @@ const UserManagementPage: React.FC = () => {
       const token = currentUser?.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/users/${userId}`,
+        `/api/admin/users/${userId}`,
         {
           method: "DELETE",
           headers: {

@@ -36,7 +36,7 @@ const BrandManagementPage: React.FC = () => {
       setLoading(true);
       const token = user?.token;
 
-      const response = await fetch("http://localhost:5000/api/brands/admin", {
+      const response = await fetch("/api/brands/admin", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -99,8 +99,8 @@ const BrandManagementPage: React.FC = () => {
     try {
       const token = user?.token;
       const url = editingBrand
-        ? `http://localhost:5000/api/brands/${editingBrand._id}`
-        : "http://localhost:5000/api/brands";
+        ? `/api/brands/${editingBrand._id}`
+        : "/api/brands";
 
       const response = await fetch(url, {
         method: editingBrand ? "PUT" : "POST",
@@ -154,7 +154,7 @@ const BrandManagementPage: React.FC = () => {
       const token = user?.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/brands/${brandId}`,
+        `/api/brands/${brandId}`,
         {
           method: "DELETE",
           headers: {
@@ -181,7 +181,7 @@ const BrandManagementPage: React.FC = () => {
       const token = user?.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/brands/${brand._id}`,
+        `/api/brands/${brand._id}`,
         {
           method: "PUT",
           headers: {

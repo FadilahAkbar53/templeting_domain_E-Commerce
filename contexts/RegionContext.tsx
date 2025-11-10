@@ -146,7 +146,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = userData.token;
 
       setLoading(true);
-      const response = await fetch("http://localhost:5000/api/wishlist", {
+      const response = await fetch("/api/wishlist", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -176,7 +176,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = userData.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/wishlist/${productId}`,
+        `/api/wishlist/${productId}`,
         {
           method: "POST",
           headers: {
@@ -203,7 +203,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = userData.token;
 
       const response = await fetch(
-        `http://localhost:5000/api/wishlist/${productId}`,
+        `/api/wishlist/${productId}`,
         {
           method: "DELETE",
           headers: {

@@ -77,7 +77,7 @@ const [wishlist, setWishlist] = useState<string[]>(() => {
 // Wishlist dari backend API dengan authentication
 const fetchWishlist = async () => {
   const token = userData.token;
-  const response = await fetch("http://localhost:5000/api/wishlist", {
+  const response = await fetch("/api/wishlist", {
     headers: { Authorization: `Bearer ${token}` },
   });
   // ...

@@ -34,7 +34,7 @@ const MyOrdersPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:5000/api/orders/myorders",
+        "/api/orders/myorders",
         {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -62,7 +62,7 @@ const MyOrdersPage: React.FC = () => {
     try {
       setCancellingOrderId(orderId);
       const response = await fetch(
-        `http://localhost:5000/api/orders/${orderId}/cancel`,
+        `/api/orders/${orderId}/cancel`,
         {
           method: "PUT",
           headers: {
