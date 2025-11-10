@@ -6,7 +6,6 @@ const BrandSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     logo: {
@@ -26,5 +25,11 @@ const BrandSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Create a case-insensitive unique index on name field
+BrandSchema.index({ name: 1 }, { 
+  unique: true, 
+  collation: { locale: 'en', strength: 2 } 
+});
 
 module.exports = mongoose.model("Brand", BrandSchema);
